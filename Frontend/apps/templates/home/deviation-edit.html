@@ -1,0 +1,171 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Update Deviation {{ deviation.id }} {% endblock %}
+
+{% block content %}
+
+    <div class="pcoded-main-container">
+        <div class="pcoded-wrapper">
+            <div class="pcoded-content">
+                <div class="pcoded-inner-content">
+                    <div class="main-body">
+                        <div class="page-wrapper">
+                            {% with messages = get_flashed_messages(with_categories=true) %}
+                                {% for category, message in messages %}
+                                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                                {% endfor %}
+                            {% endwith %}
+
+                            <div class="app-page-heading">
+                                <div>
+                                    <span class="app-kicker">Update record</span>
+                                    <h1>Deviation {{ deviation.id }}</h1>
+                                </div>
+                                <a class="btn btn-outline-primary" href="{{ url_for('home_blueprint.deviation_detail', deviation_id=deviation.id) }}">
+                                    <i class="feather icon-arrow-left"></i>
+                                    Back
+                                </a>
+                            </div>
+
+                            {% set form_category_options = category_options|default(area_options|default(['Equipment', 'Flow', 'Planning', 'Yard', 'Human', 'Others'])) %}
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Deviation information</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form method="post">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="date">Date</label>
+                                                    <input id="date" name="date" type="date" class="form-control" value="{{ deviation.date }}" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="shiftType">Shift</label>
+                                                    <select id="shiftType" name="shiftType" class="form-control" required>
+                                                        {% for shift in shift_options %}
+                                                            <option value="{{ shift }}" {% if deviation.shiftType == shift %}selected{% endif %}>{{ shift }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="status">Status</label>
+                                                    <select id="status" name="status" class="form-control" required>
+                                                        {% for status in status_options %}
+                                                            <option value="{{ status }}" {% if deviation.status == status %}selected{% endif %}>{{ status }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="category">Category</label>
+                                                    <select id="category" name="category" class="form-control" required>
+                                                        {% for category_label in form_category_options %}
+                                                            <option value="{{ category_label }}" {% if deviation.category == category_label %}selected{% endif %}>{{ category_label }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="duration">Duration (minutes)</label>
+                                                    <input id="duration" name="duration" type="number" class="form-control" min="0" step="1" value="{{ deviation.duration|default(0) }}" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="deviation_type_id">Deviation Type</label>
+                                                    <select id="deviation_type_id" name="deviation_type_id" class="form-control" required data-searchable-select data-search-placeholder="Search deviation types">
+                                                        {% for option in deviation_type_options %}
+                                                            <option value="{{ option.id }}" data-category="{{ option.category|default('Yard') }}" {% if deviation.deviation_type_id == option.id %}selected{% endif %}>{{ option.name }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="qc_id">QC</label>
+                                                    <select id="qc_id" name="qc_id" class="form-control" required>
+                                                        {% for option in qc_options %}
+                                                            <option value="{{ option.id }}" {% if deviation.qc_id == option.id %}selected{% endif %}>{{ option.qcName }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="vessel_ids">Vessel</label>
+                                                    {% set selected_vessel_id = (deviation.vessel_ids|default([])|first) %}
+                                                    <select id="vessel_ids" name="vessel_ids" class="form-control" data-searchable-select data-search-placeholder="Search vessels">
+                                                        <option value="">Select vessel</option>
+                                                        {% for option in vessel_options %}
+                                                            <option value="{{ option.id }}" {% if option.id == selected_vessel_id %}selected{% endif %}>{{ option.name }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    <label for="description">Description</label>
+                                                    <textarea id="description" name="description" class="form-control" rows="4">{{ deviation.description|default('') }}</textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary"><i class="feather icon-save"></i>Save</button>
+                                        <a class="btn btn-outline-secondary" href="{{ url_for('home_blueprint.deviation_detail', deviation_id=deviation.id) }}"><i class="feather icon-x"></i>Cancel</a>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}
+
+{% block javascripts %}
+<script src="{{ config.ASSETS_ROOT }}/js/searchable-select.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const categorySelect = document.getElementById('category');
+    const typeSelect = document.getElementById('deviation_type_id');
+    if (!categorySelect || !typeSelect) {
+        return;
+    }
+
+    function syncDeviationTypes() {
+        const selectedCategory = categorySelect.value;
+        let firstVisible = null;
+
+        Array.from(typeSelect.options).forEach(function (option) {
+            const matches = option.dataset.category === selectedCategory;
+            option.hidden = !matches;
+            option.disabled = !matches;
+            if (matches && firstVisible === null) {
+                firstVisible = option.value;
+            }
+        });
+
+        const selectedOption = typeSelect.selectedOptions[0];
+        if ((!selectedOption || selectedOption.disabled) && firstVisible !== null) {
+            typeSelect.value = firstVisible;
+            typeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        } else {
+            typeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+    }
+
+    categorySelect.addEventListener('change', syncDeviationTypes);
+    syncDeviationTypes();
+});
+</script>
+{% endblock javascripts %}

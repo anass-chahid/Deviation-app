@@ -1,0 +1,127 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Deviation {{ deviation.id }} {% endblock %}
+
+{% block content %}
+
+    {% set status = deviation.status|default('') %}
+    {% set status_class = 'app-status-done' if status == 'Done' else 'app-status-progress' if status == 'On going' else 'app-status-pending' %}
+
+    <div class="pcoded-main-container">
+        <div class="pcoded-wrapper">
+            <div class="pcoded-content">
+                <div class="pcoded-inner-content">
+                    <div class="main-body">
+                        <div class="page-wrapper app-simple-detail-page">
+                            {% with messages = get_flashed_messages(with_categories=true) %}
+                                {% for category, message in messages %}
+                                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                                {% endfor %}
+                            {% endwith %}
+
+                            <div class="app-page-heading">
+                                <div>
+                                    <span class="app-kicker">Record detail</span>
+                                </div>
+                                <div class="app-heading-actions">
+                                    <a class="btn btn-outline-secondary" href="{{ url_for('home_blueprint.deviations') }}">
+                                        <i class="feather icon-arrow-left"></i>
+                                        Back
+                                    </a>
+                                    <a class="btn btn-primary" href="{{ url_for('home_blueprint.deviation_edit', deviation_id=deviation.id) }}">
+                                        <i class="feather icon-edit-2"></i>
+                                        Update
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="card app-simple-detail-card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5>Details</h5>
+                                    <span class="app-status {{ status_class }}">{{ status or 'Unknown' }}</span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="app-simple-detail-grid">
+                                        <div>
+                                            <span>Date</span>
+                                            <strong>{{ deviation.date }}</strong>
+                                        </div>
+                                        <div>
+                                            <span>Week</span>
+                                            <strong>{{ deviation.ts }}</strong>
+                                        </div>
+                                        <div>
+                                            <span>Shift</span>
+                                            <strong>{{ deviation.shiftType }}</strong>
+                                        </div>
+                                        <div>
+                                            <span>Category</span>
+                                            <strong>{{ deviation.category|default('Yard') }}</strong>
+                                        </div>
+                                        <div>
+                                            <span>Duration</span>
+                                            <strong>{{ deviation.duration|default(0) }} min</strong>
+                                        </div>
+                                        <div>
+                                            <span>Deviation type</span>
+                                            <strong>{{ deviation_type_map.get(deviation.deviation_type_id, deviation.deviation_type_id) }}</strong>
+                                        </div>
+                                        <div>
+                                            <span>QC</span>
+                                            <strong>{{ qc_map.get(deviation.qc_id, deviation.qc_id) }}</strong>
+                                        </div>
+                                        <div>
+                                            <span>Created by</span>
+                                            <strong>{{ deviation.creator_name or 'Unknown' }}</strong>
+                                        </div>
+                                    </div>
+
+                                    <div class="app-simple-detail-section">
+                                        <span>Description</span>
+                                        <p>{{ deviation.description or 'No description provided.' }}</p>
+                                    </div>
+
+                                    <div class="app-simple-detail-section">
+                                        <span>Vessels</span>
+                                        <div class="app-simple-chip-row">
+                                            {% for vessel_id in deviation.vessel_ids|default([]) %}
+                                                <span class="app-chip app-chip-muted">{{ vessel_map.get(vessel_id, vessel_id) }}</span>
+                                            {% else %}
+                                                <span class="text-muted">No vessels assigned</span>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card mt-4">
+                                <div class="card-header">
+                                    <h5>Audit trail</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="app-simple-audit-list">
+                                        {% for audit in audits %}
+                                            <div class="app-simple-audit">
+                                                <strong>{{ audit.action|capitalize }}</strong>
+                                                <small>{{ audit.created_at }} by {{ audit.actor_name }}</small>
+                                                {% if audit.details %}
+                                                    <p>{{ audit.details }}</p>
+                                                {% endif %}
+                                            </div>
+                                        {% else %}
+                                            <div class="app-empty app-empty-compact">
+                                                <i class="feather icon-clock"></i>
+                                                <span>No audit events recorded yet</span>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}
